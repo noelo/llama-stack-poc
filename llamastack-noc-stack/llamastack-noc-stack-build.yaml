@@ -1,0 +1,16 @@
+version: '2'
+distribution_spec:
+  description: noc test
+  container_image: null
+  providers:
+    inference: remote::vllm
+    safety: inline::prompt-guard
+    agents: inline::meta-reference
+    vector_io: inline::faiss
+    datasetio: inline::localfs
+    scoring: inline::basic
+    eval: inline::meta-reference
+    post_training: inline::torchtune
+    tool_runtime: remote::model-context-protocol
+    telemetry: inline::meta-reference
+image_type: venv

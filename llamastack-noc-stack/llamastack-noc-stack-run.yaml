@@ -1,0 +1,77 @@
+version: '2'
+image_name: llamastack-noc-stack
+container_image: null
+apis:
+- inference
+- safety
+- agents
+- vector_io
+- datasetio
+- scoring
+- eval
+- post_training
+- tool_runtime
+- telemetry
+providers:
+  inference:
+  - provider_id: vllm
+    provider_type: remote::vllm
+    config:
+      url: ${env.VLLM_URL}
+      max_tokens: ${env.VLLM_MAX_TOKENS:4096}
+      api_token: ${env.VLLM_API_TOKEN:fake}
+  safety:
+  - provider_id: prompt-guard
+    provider_type: inline::prompt-guard
+    config: {}
+  agents:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config:
+      persistence_store:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/llamastack-noc-stack}/agents_store.db
+  vector_io:
+  - provider_id: faiss
+    provider_type: inline::faiss
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/llamastack-noc-stack}/faiss_store.db
+  datasetio:
+  - provider_id: localfs
+    provider_type: inline::localfs
+    config: {}
+  scoring:
+  - provider_id: basic
+    provider_type: inline::basic
+    config: {}
+  eval:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config: {}
+  post_training:
+  - provider_id: torchtune
+    provider_type: inline::torchtune
+    config: {}
+  tool_runtime:
+  - provider_id: model-context-protocol
+    provider_type: remote::model-context-protocol
+    config: {}
+  telemetry:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config:
+      service_name: ${env.OTEL_SERVICE_NAME:llama-stack}
+      sinks: ${env.TELEMETRY_SINKS:console,sqlite}
+      sqlite_db_path: ${env.SQLITE_DB_PATH:~/.llama/distributions/llamastack-noc-stack/trace_store.db}
+metadata_store: null
+models: []
+shields: []
+vector_dbs: []
+datasets: []
+scoring_fns: []
+eval_tasks: []
+tool_groups: []
