@@ -9,7 +9,7 @@ apis:
 - datasetio
 - scoring
 - eval
-- post_training
+# - post_training
 - tool_runtime
 - telemetry
 providers:
@@ -20,11 +20,14 @@ providers:
       url: ${env.VLLM_URL}
       max_tokens: ${env.VLLM_MAX_TOKENS:4096}
       api_token: ${env.VLLM_API_TOKEN:fake}
-  safety:
-  - provider_id: prompt-guard
-    provider_type: inline::prompt-guard
+  - provider_id: sentence-transformers
+    provider_type: inline::sentence-transformers
     config: {}
-  agents:
+  safety: []
+  # - provider_id: prompt-guard
+  #   provider_type: inline::prompt-guard
+  #   config: {}
+  agents: 
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
@@ -40,27 +43,27 @@ providers:
         type: sqlite
         namespace: null
         db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/llamastack-noc-stack}/faiss_store.db
-  datasetio:
-  - provider_id: localfs
-    provider_type: inline::localfs
-    config: {}
+  datasetio: []
+  # - provider_id: localfs
+  #   provider_type: inline::localfs
+  #   config: {}
   scoring:
   - provider_id: basic
     provider_type: inline::basic
     config: {}
-  eval:
-  - provider_id: meta-reference
-    provider_type: inline::meta-reference
-    config: {}
-  post_training:
-  - provider_id: torchtune
-    provider_type: inline::torchtune
-    config: {}
+  eval: []
+  # - provider_id: meta-reference
+  #   provider_type: inline::meta-reference
+  #   config: {}
+  # post_training: 
+  # - provider_id: torchtune
+  #   provider_type: inline::torchtune
+  #   config: {}
   tool_runtime:
-  - provider_id: model-context-protocol
-    provider_type: remote::model-context-protocol
-    config: {}
-  telemetry:
+    - provider_id: model-context-protocol
+      provider_type: remote::model-context-protocol
+      config: {}
+  telemetry: 
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
@@ -68,10 +71,23 @@ providers:
       sinks: ${env.TELEMETRY_SINKS:console,sqlite}
       sqlite_db_path: ${env.SQLITE_DB_PATH:~/.llama/distributions/llamastack-noc-stack/trace_store.db}
 metadata_store: null
-models: []
+models:
+- metadata: {}
+  model_id: ${env.INFERENCE_MODEL}
+  provider_id: vllm
+  model_type: llm
+- metadata:
+    embedding_dimension: 384
+  model_id: all-MiniLM-L6-v2
+  provider_id: sentence-transformers
+  model_type: embedding
 shields: []
 vector_dbs: []
 datasets: []
 scoring_fns: []
 eval_tasks: []
-tool_groups: []
+tool_groups: 
+- toolgroup_id: mcp::testtool
+  provider_id: model-context-protocol
+  mcp_endpoint:
+    uri: "http://127.0.0.1:8888/sse"

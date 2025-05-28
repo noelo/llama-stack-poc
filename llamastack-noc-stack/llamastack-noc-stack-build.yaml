@@ -1,16 +1,22 @@
 version: '2'
 distribution_spec:
   description: noc test
-  container_image: null
+  container_image: "registry.access.redhat.com/ubi9"
   providers:
     inference: remote::vllm
-    safety: inline::prompt-guard
+    safety: []
     agents: inline::meta-reference
-    vector_io: inline::faiss
-    datasetio: inline::localfs
-    scoring: inline::basic
-    eval: inline::meta-reference
-    post_training: inline::torchtune
-    tool_runtime: remote::model-context-protocol
+    vector_io: 
+    - inline::milvus
+    datasetio: []
+    scoring: []
+    eval: []
+    tool_runtime: []
     telemetry: inline::meta-reference
-image_type: venv
+image_type: container
+image_name: llama-stack-demos
+additional_pip_packages:
+- mcp
+- blobfile
+- sqlalchemy[asyncio]
+- pymilvus

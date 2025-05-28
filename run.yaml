@@ -1,38 +1,31 @@
 version: '2'
-image_name: remote-vllm
+image_name: remote-vllm-milvus
+container_image: remote-vllm-milvus
 apis:
-- agents
-- datasetio
-- eval
 - inference
 - safety
-- scoring
-- telemetry
-- tool_runtime
+- agents
 - vector_io
+- datasetio
+- scoring
+- eval
+- post_training
+- tool_runtime
+- telemetry
 providers:
   inference:
-  - provider_id: vllm-inference
+  - provider_id: vllm
     provider_type: remote::vllm
     config:
       url: ${env.VLLM_URL}
       max_tokens: ${env.VLLM_MAX_TOKENS:4096}
       api_token: ${env.VLLM_API_TOKEN:fake}
-  - provider_id: sentence-transformers
-    provider_type: inline::sentence-transformers
-    config: {}
-  vector_io:
-  - provider_id: faiss
-    provider_type: inline::faiss
+      tls_verify: ${env.VLLM_TLS_VERIFY:true}
+  safety:
+  - provider_id: prompt-guard
+    provider_type: inline::prompt-guard
     config:
-      kvstore:
-        type: sqlite
-        namespace: null
-        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm}/faiss_store.db
-  # safety: []
-  # - provider_id: llama-guard
-  #   provider_type: inline::llama-guard
-  #   config: {}
+      guard_type: injection
   agents:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
@@ -40,80 +33,67 @@ providers:
       persistence_store:
         type: sqlite
         namespace: null
-        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm}/agents_store.db
-  eval:
-  - provider_id: meta-reference
-    provider_type: inline::meta-reference
-    config: {}
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm-milvus}/agents_store.db
+      responses_store:
+        type: sqlite
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm-milvus}/responses_store.db
+  vector_io:
+  - provider_id: milvus
+    provider_type: inline::milvus
+    config:
+      db_path: ${env.MILVUS_DB_PATH}
   datasetio:
-  - provider_id: huggingface
-    provider_type: remote::huggingface
-    config: {}
   - provider_id: localfs
     provider_type: inline::localfs
-    config: {}
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm-milvus}/localfs_datasetio.db
   scoring:
   - provider_id: basic
     provider_type: inline::basic
     config: {}
-  # - provider_id: llm-as-judge
-  #   provider_type: inline::llm-as-judge
-  #   config: {}
-  # - provider_id: braintrust
-  #   provider_type: inline::braintrust
-  #   config:
-  #     openai_api_key: ${env.OPENAI_API_KEY:}
+  eval:
+  - provider_id: meta-reference
+    provider_type: inline::meta-reference
+    config:
+      kvstore:
+        type: sqlite
+        namespace: null
+        db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm-milvus}/meta_reference_eval.db
+  post_training:
+  - provider_id: torchtune
+    provider_type: inline::torchtune
+    config:
+      checkpoint_format: meta
+  tool_runtime:
+  - provider_id: model-context-protocol
+    provider_type: remote::model-context-protocol
+    config: {}
   telemetry:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
-      service_name: ${env.OTEL_SERVICE_NAME:llama-stack}
-      sinks: ${env.TELEMETRY_SINKS:console}
-      # sinks: ${env.TELEMETRY_SINKS:console,sqlite}
-      sqlite_db_path: ${env.SQLITE_DB_PATH:~/.llama/distributions/remote-vllm/trace_store.db}
-  tool_runtime:
-  # - provider_id: brave-search
-  #   provider_type: remote::brave-search
-  #   config:
-  #     api_key: ${env.BRAVE_SEARCH_API_KEY:}
-  #     max_results: 3
-  # - provider_id: tavily-search
-  #   provider_type: remote::tavily-search
-  #   config:
-  #     api_key: ${env.TAVILY_SEARCH_API_KEY:}
-  #     max_results: 3
-  # - provider_id: code-interpreter
-  #   provider_type: inline::code-interpreter
-  #   config: {}
-  - provider_id: rag-runtime
-    provider_type: inline::rag-runtime
-    config: {}
-  - provider_id: model-context-protocol
-    provider_type: remote::model-context-protocol
-    config: {}
-metadata_store:
-  type: sqlite
-  db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm}/registry.db
-models:
-- metadata: 
-    llama_model: meta-llama/Llama-3-8B
-  model_id: ${env.INFERENCE_MODEL}
-  provider_id: vllm-inference
-  model_type: llm
-- metadata:
-    embedding_dimension: 384
-  model_id: all-MiniLM-L6-v2
-  provider_id: sentence-transformers
-  model_type: embedding
+      service_name: ${env.OTEL_SERVICE_NAME:}
+      sinks: ${env.TELEMETRY_SINKS:console,sqlite}
+      sqlite_db_path: ${env.SQLITE_STORE_DIR:~/.llama/distributions/remote-vllm-milvus}/trace_store.db
+metadata_store: null
+inference_store: null
+models: []
 shields: []
 vector_dbs: []
 datasets: []
 scoring_fns: []
-eval_tasks: []
-tool_groups: 
-# - toolgroup_id: builtin::websearch
-#   provider_id: tavily-search
-- toolgroup_id: builtin::rag
-  provider_id: rag-runtime
-# - toolgroup_id: builtin::code_interpreter
-#   provider_id: code-interpreter
+benchmarks: []
+tool_groups: []
+logging: null
+server:
+  port: 8321
+  tls_certfile: null
+  tls_keyfile: null
+  tls_cafile: null
+  auth: null
+  host: null
+  quota: null
+external_providers_dir: /home/noelo/.llama/providers.d
