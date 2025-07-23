@@ -1,0 +1,24 @@
+version: 2
+distribution_spec:
+  description: mcp test image
+  container_image: "registry.access.redhat.com/ubi9"
+  providers:
+    inference: remote::vllm
+    safety: inline::prompt-guard
+    agents: inline::meta-reference
+    vector_io: inline::meta-reference
+    datasetio: inline::localfs
+    scoring: inline::basic
+    eval: inline::meta-reference
+    post_training: inline::torchtune
+    tool_runtime: remote::model-context-protocol
+    telemetry: inline::meta-reference
+    files: inline::localfs
+image_type: container
+image_name: null
+external_providers_dir: null
+additional_pip_packages:
+- mcp
+- blobfile
+- sqlalchemy[asyncio]
+- pymilvus

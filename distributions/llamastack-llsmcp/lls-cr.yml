@@ -1,7 +1,7 @@
 apiVersion: llamastack.io/v1alpha1
 kind: LlamaStackDistribution
 metadata:
-  name: llamastackdistribution-sample
+  name: llsphi-4
 spec:
   replicas: 1
   server:
@@ -10,22 +10,32 @@ spec:
         - name: VLLM_TLS_VERIFY
           value: 'false'
         - name: VLLM_MAX_TOKENS
-          value: '4096'
+          value: '6000'
         - name: LLAMA_STACK_CLIENT_LOG
           value: debug 
         - name: INFERENCE_MODEL
-          value: 'granite-3-8b-instruct'
+          value: 'microsoft/phi-4'
         - name: VLLM_DEBUG_LOG_API_SERVER_RESPONSE
           value: 'true' 
         - name: VLLM_URL
-          value: https://.........com:443/v1
+          value: https://phi-4-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1
         - name: VLLM_API_TOKEN
-          value: THISISAKEY
+          value: 2f55e6e60c32dfd2052a4997a03769f5
         - name: MILVUS_DB_PATH
           value: /home/lls/.lls/milvus.db
       name: llama-stack
     distribution:
       image: quay.io/noeloc/llama-stack:dev
+    # podOverrides:
+    #   volumeMounts:
+    #     - name: my-secret-volume
+    #       mountPath: /app
+    #       subpath: .
+    #       readOnly: true  # Recommended for security
+    #   volumes:
+    #     - name: my-secret-volume
+    #       secret:
+    #          secretName: noctest
       # name: vllm
     # Uncomment the storage section to use persistent storage
     # storage: {}  # Will use default size of 10Gi and default mount path of /.llama
