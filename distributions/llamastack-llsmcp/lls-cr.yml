@@ -20,26 +20,13 @@ spec:
         - name: VLLM_URL
           value: https://phi-4-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443/v1
         - name: VLLM_API_TOKEN
-          value: 2f55e6e60c32dfd2052a4997a03769f5
+          value: e5a33eb9617653178addd0ab1f50a57e
         - name: MILVUS_DB_PATH
           value: /home/lls/.lls/milvus.db
       name: llama-stack
     distribution:
-      image: quay.io/noeloc/llama-stack:dev
-    # podOverrides:
-    #   volumeMounts:
-    #     - name: my-secret-volume
-    #       mountPath: /app
-    #       subpath: .
-    #       readOnly: true  # Recommended for security
-    #   volumes:
-    #     - name: my-secret-volume
-    #       secret:
-    #          secretName: noctest
-      # name: vllm
-    # Uncomment the storage section to use persistent storage
-    # storage: {}  # Will use default size of 10Gi and default mount path of /.llama
-    # Or specify custom values:
-    storage:
+      image: quay.io/noeloc/llsmcp:latest
       size: "20Gi"
       mountPath: "/home/lls/.lls"  # Optional, defaults to /.llama. Use with custom distribution images that have a different setup.
+    userConfig:
+      configMapName: llsmcp
