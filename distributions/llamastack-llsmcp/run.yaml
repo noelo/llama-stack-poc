@@ -15,13 +15,12 @@ apis:
 - files
 providers:
   inference:
-  - provider_id: vllm
+  - provider_id: vllm-0
     provider_type: remote::vllm
     config:
-      url: ${env.VLLM_URL:=}
-      max_tokens: ${env.VLLM_MAX_TOKENS:=4096}
-      api_token: ${env.VLLM_API_TOKEN:=fake}
-      tls_verify: ${env.VLLM_TLS_VERIFY:=true}
+      url: ${env.VLLM_URL}
+      max_tokens: 4096
+      api_token: ${env.VLLM_API_TOKEN}
   safety: []
   agents:
   - provider_id: meta-reference
@@ -70,13 +69,21 @@ providers:
         db_path: ${env.SQLITE_STORE_DIR:=~/.llama/distributions/llamastack-llsmcp}/files_metadata.db
 metadata_store: null
 inference_store: null
-models: []
+models:
+- metadata: {}
+  model_id: ${env.INFERENCE_MODEL}
+  provider_id: vllm-0
+  model_type: llm
 shields: []
 vector_dbs: []
 datasets: []
 scoring_fns: []
 benchmarks: []
-tool_groups: []
+tool_groups: 
+    - toolgroup_id: mcp::github
+      provider_id: model-context-protocol
+      mcp_endpoint:
+        uri: http://githubmcp.agentic-ai.svc.cluster.local:80/sse
 logging: null
 server:
   port: 8321

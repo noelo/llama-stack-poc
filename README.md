@@ -37,7 +37,22 @@ podman tag localhost/llsmcp:0.2.15 quay.io/noeloc/llsmcp:latest
 podman tag localhost/llsmcp:0.2.15 quay.io/noeloc/llsmcp:latest
 ```
 
-# fill out the CR and apply
+
+# Create the runtime config
+
+1. Edit the llamastack-llsmcp-build.yaml file
+
+1. Rename the llamastack-llsmcp-build.yaml to run.yaml
+
+1. Create the secret 
+
+```
+oc create cm llsmcp --from-file=run.yaml
+```
+
+# Create the stack
+
+* Fill out the CR 
 ```
 apiVersion: llamastack.io/v1alpha1
 kind: LlamaStackDistribution
@@ -70,4 +85,16 @@ spec:
     storage:
       size: "20Gi"
       mountPath: "/home/lls/.lls"  # Optional, defaults to /.llama. Use with custom distribution images that have a different setup.
+    userConfig:
+      configMapName: llsmcp
+```
+
+* Apply the CR
+```
+oc apply -f lls-cr.yml
+```
+
+* Create the route
+```
+oc create route edge --service llsmcp-service
 ```
